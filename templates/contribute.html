@@ -1,0 +1,16 @@
+{% extends "frame.html" %}
+
+{% block content %}
+
+<h2>Contribute</h2>
+
+<h3>Please select a course to edit:</h3>
+<ul>
+    {% for course in courses %}
+    <li>
+        <a href="{{url_for('course', id=course['id'])}}">{{course['shortname']}} &ndash; {{course['name']}}</a>
+    </li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

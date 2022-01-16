@@ -16,6 +16,8 @@ def get_courses(ids=None):
                 SELECT id, shortname, name, dprs_id
                 FROM Course
             """
+            results = cur.execute(query)
+
         else:
             query = """
                 SELECT id, shortname, name, dprs_id
@@ -23,7 +25,7 @@ def get_courses(ids=None):
                 WHERE id IN ({})
             """.format(','.join('?'*len(ids)))
 
-        results = cur.execute(query, ids)
+            results = cur.execute(query, ids)
 
         courses = []
         for (id, shortname, name, dprs_id) in results:

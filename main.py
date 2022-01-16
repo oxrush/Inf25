@@ -169,15 +169,16 @@ def unverified_forward():
     
     return render_template("untrusted.html", url=url)
 
+@app.route("/contribute")
+@verification_required
+def contribute():
+    courses = database.get_courses()
+    return render_template("contribute.html", courses=courses)
+
 @app.route("/logout", methods=["POST"])
 def logout():
     session.clear()
     return redirect(url_for("index"))
-
-
-@app.route("/TEMP")
-def contribute():
-    abort(418)
 
 @app.errorhandler(404)
 def err_404(error):
