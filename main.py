@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
+import json
 from os import getenv
 import re
 import secrets
-from flask import Flask, render_template, session, request, redirect, url_for, abort
+from flask import Flask, render_template, session, request, redirect, url_for, abort, jsonify
 from flask_mail import Mail, Message
 from flask.helpers import flash
 import database
@@ -174,6 +175,13 @@ def unverified_forward():
 def contribute():
     courses = database.get_courses()
     return render_template("contribute.html", courses=courses)
+
+@app.route("/api/assignments")
+def api_assignments():
+    date = request.args["date"]
+    courses = request.args["courses"].split("and")
+    assignments = database.get_assignments(courses, date)
+    return jsonify(assignments)
 
 @app.route("/logout", methods=["POST"])
 def logout():

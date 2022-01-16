@@ -247,6 +247,39 @@ def count_failed_logins(username, since):
 
     return count
 
+def get_assignments(courses, date):
+    conn = __db_connect()
+    cur = conn.cursor()
+
+    try:
+
+        
+        query = """
+            SELECT id, course_id, day, time, name, submission_location
+            FROM Assignment
+            WHERE course_id IN ({})
+                AND (
+                    day = ?
+                    OR day = strftime("%w", ?)
+                )
+        """.format(','.join('?'*len(courses)))
+
+        results = cur.execute(query, (*courses, date, date))
+
+        assignments = []
+        for (id, course_id, day, time, name, submission_location) in results:
+            assignments.append({
+                "id": id,
+                "course_id": course_id,
+                "day": day,
+                "time": time,
+                "name": name,
+                "submission_location": submission_location
+            })
+    finally:
+        conn.close()
+
+    return assignments
 
 
 '''
