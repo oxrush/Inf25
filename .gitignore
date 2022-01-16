@@ -1,3 +1,4 @@
 .vscode\
 config.json
 inf25env\
+__pycache__
