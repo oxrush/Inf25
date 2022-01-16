@@ -2,4 +2,4 @@
 config.json
 inf25env\
 __pycache__
-db.sqlite
+db.sqlite3
