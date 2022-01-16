@@ -1,0 +1,22 @@
+{% extends "frame.html" %}
+
+{% block content %}
+
+<h2>Verify your identity to make changes</h2>
+
+<p>
+    An code has been sent to {{claimed_email}}. It will be valid for 20 minutes. <br />
+    Please enter the code below.
+</p>
+
+<form method="POST">
+    <p>
+        Code: 
+        <input type="text" name="code" maxlength="256" autocomplete="off" autocapitalize="off" required="required" placeholder="code" spellcheck="false" />
+    </p>
+    <input type="submit" value="Submit" />
+</form>
+
+
+
+{% endblock %}

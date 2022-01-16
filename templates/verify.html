@@ -1,0 +1,24 @@
+{% extends "frame.html" %}
+
+{% block content %}
+
+<h2>Verify your identity to make changes</h2>
+
+<p>
+    Please enter your university username.
+    This will be used to send an email containing a code, which you will recieve if you are a current informatics student.
+    Your username will be recorded with any changes you make.
+</p>
+
+<form method="POST">
+    <p>
+        Email: 
+        <input type="text" name="login" maxlength="256" autocomplete="on" autocapitalize="off" required="required" placeholder="e.g. s0000000" inputmode="email" spellcheck="false" />
+        @inf.ed.ac.uk
+    </p>
+    <input type="submit" value="Send" />
+</form>
+
+
+
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends "frame.html" %}
+
+{% block content %}
+
+<h2>Edit course</h2>
+<table class="border">
+    <tr>
+        <td>Name</td>
+        <td>{{course_info["name"]}}</td>
+    </tr>
+    <tr>
+        <td>Short name</td>
+        <td>{{course_info["shortname"]}}</td>
+    </tr>
+    <tr>
+        <td>DPRS ID</td>
+        <td>{{course_info["dprs_id"]}}</td>
+    </tr>
+</table>
+
+<h3>Links</h3>
+
+{% for link_category in ["main", "textbooks", "lectures", "official", "extra"] %}
+<h4>{{link_category.title()}}</h4>
+<table>
+    {% for id, precedence, url, title, verified in links[link_category] %}
+    <tr id="link_{{id}}">
+        <td>{{precedence}}</td>
+        <td>{{title}}</td>
+        <td>{{url}}</td>
+        <td>{{"verified" if verified == 1 else "unverified"}}</td>
+        <td>
+            <button onclick="edit_link('{{id}}', '{{precedence}}', '{{title}}', '{{url}}')">Edit</button>
+            <button onclick="delete_link('{{id}}', '{{title}}')">Delete</button>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+<button onclick="add_link('{{link_category}}')">Add new</button>
+{% endfor %}
+
+<iframe name="dummyframe" id="dummyframe" style="display: none;"></iframe>
+
+<div id="popup">
+    <h3 id="popup_heading"></h2>
+    <form id="popup_form" method="post" target="dummyframe" onsubmit="delayed_reload()">
+
+        <input id="popup_type" type="hidden" name="type"/>
+
+        <label for="precedence">Order</label>
+        <input id="popup_precedence" type="number" name="precedence" placeholder="order" required style="width: 85%;" />
+        <br />
+
+        <label for="title">Title</label>
+        <input id="popup_title" type="text" name="title" placeholder="title" required style="width: 85%;" />
+        <br />
+
+        <label for="url">URL</label>
+        <input id="popup_url" type="url" name="url" placeholder="url" required style="width: 85%;" />
+        <br />
+
+        <input type="submit" value="Save" />
+        <input type="button" value="Cancel" onclick="popup_hide()"/>
+
+    </form>
+</div>
+
+<script>
+
+    function delayed_reload(){
+        setTimeout(() => location.reload(), 500)
+    }
+
+    function popup_show(){
+        document.getElementById("popup").style.display = "block";
+    }
+
+    function popup_hide(){
+        document.getElementById("popup").style.display = "none";
+    }
+
+    function delete_link(id, title){
+        confirmed = confirm(`Are you sure you would like to delete the link "${title}"?`);
+        if (confirmed) {
+            var req = new XMLHttpRequest();
+            req.addEventListener("error", () => alert("Could not delete."));
+            req.addEventListener("load", () => location.reload());
+            req.open("DELETE", `/link/${id}`);
+            req.send();
+        }
+    }
+
+    function edit_link(id, precedence, title, url){
+
+        document.getElementById("popup_heading").innerHTML = "Edit link";
+        document.getElementById("popup_type").value = "";
+        document.getElementById("popup_precedence").value = precedence;
+        document.getElementById("popup_form").action = `/link/${id}`;
+        document.getElementById("popup_title").value = title;
+        document.getElementById("popup_url").value = url;
+        
+        popup_show()
+    }
+
+    function add_link(type){
+
+        document.getElementById("popup_heading").innerHTML = "Add link";
+        document.getElementById("popup_type").value = type;
+        document.getElementById("popup_precedence").value = 99999;
+        document.getElementById("popup_form").action = "";
+        document.getElementById("popup_title").value = "";
+        document.getElementById("popup_url").value = "";
+        
+        popup_show()
+    }
+</script>
+
+
+{% endblock %}

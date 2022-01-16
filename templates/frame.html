@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Inf'25 Dashboard</title>
+        <link rel="shortcut icon" href="{{url_for('static', filename='favicon.ico')}}" />
+        <link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}" />
+    </head>
+
+    <body>
+    
+    {% if "verified_email" in session %}
+    <p>
+        You are signed in as {{session["verified_email"]}}. 
+        <form action="/logout" method="POST">
+            <input type="submit" value="Log out" />
+        </form>
+    </p>
+    {% endif %}
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class=flashes>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+        
+    <img class="left" src="{{url_for('static', filename='supreme_wadler.png')}}" alt="Logo - Super Wadler">
+    <img class="right" src="{{url_for('static', filename='AT.png')}}" alt="Our Home - Appleton Tower">
+    <h1>Inf'25 Dashboard</h1>
+
+    {% block content %}
+    {% endblock %}
+
+    <p><em>I am not responsible for the accuracy of the information on this page!<br>
+    If you find any issues with the links, or have found a useful resource to include, you can make changes at <a href="https://github.com/oxrush/Inf25/" target="_blank">github.com/oxrush/Inf25</a> or ping @Circles in the Informatics '25 Discord.<br>
+    </em></p>
+        
+    </body>
+</html>

@@ -1,0 +1,82 @@
+{% extends "frame.html" %}
+
+{% block content %}
+
+<p><em>You must be logged in to Learn for the links to work! You may open learn using the link below to make sure you are logged in. You may then close that tab.</em><br>
+    
+<a href="https://www.learn.ed.ac.uk/auth-saml/saml/login?apId=_175_1" target="_blank">Login to Learn</a></p>
+
+
+<ul class="sideways">
+    <li><a href="https://piazza.com/class/" target="_blank">Piazza</a></li>
+    <li><a href="https://infpals.github.io/" target="_blank">InfPALS</a></li>
+    <li><a href="https://betterinformatics.com/" target="_blank">Better Informatics</a></li>
+    <li><a href="https://informaticsstudentlearningsupport.github.io/infbase.html" target="_blank">InfBase</a></li>
+    <li><a href="http://progclub.inf.ed.ac.uk/" target="_blank">Programming Club</a></li>
+    <li><a href="https://quizlet.com/7017/greek-alphabet-flash-cards/" target="_blank">Greek Alphabet &mdash; Quizlet</a></li>
+    
+<!--
+    <li><a href="" target="_blank"></a></li>
+-->
+</ul>
+
+<h2>Courses</h2>
+<table class="fullwidth border">
+	
+	<!-- Headings -->
+	<tr>
+        {% for course in courses %}
+		<th class="course">{{course["shortname"]}}<br>{{course["name"]}}</th>
+        {% endfor %}
+	</tr>
+	
+	
+	<!-- Links -->
+    {% for link_category in ["main", "textbooks", "lectures", "official", "extra"] %}
+	<tr>
+        {% for course in courses %}
+		<td><ul>
+            {% for _, _, url, title, verified in course["links"][link_category] %}
+			<li><a href="{{url if verified else url_for('unverified_forward') + '?url=' + quote_plus(url)}}" target="_blank">{{title}}</a></li>
+			{% endfor %}
+		</ul></td>
+        {% endfor %}
+	</tr>
+	{% endfor %}
+
+</table>
+
+<h2>Assignments</h2>
+
+
+<table><tr>
+
+	<td><h3>Weekly</h3><table class="border">
+		
+	</table></td>
+	
+	<td><h3>One-off</h3><table class="border">
+		
+	</table></td>
+	
+</tr></table>
+
+
+<h2>More information</h2>
+
+<table><tr>
+
+    <td>
+        <h3>Appleton Tower opening times</h3>
+        <ul>
+            <li><i>Winter vacation: times may vary from those shown below.</i></li>
+            <li>Weekdays 0800-1800 &ndash; whole building</li>
+            <li>Weekdays 1800-2000 &ndash; level 6 lab only</li>
+            <li>Weekends 0900-1700 &ndash; level 6 lab only</li>
+            
+        </ul>
+    </td>
+    
+</tr></table>
+
+{% endblock %}
