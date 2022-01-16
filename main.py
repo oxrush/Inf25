@@ -34,9 +34,9 @@ def verification_required(function):
 @app.route("/")
 def index():
     if not "courses" in request.args:
-        return redirect(url_for("index", courses="1,2", **request.args)) # add the default courses to the args.
+        return redirect(url_for("index", courses="1and2", **request.args)) # add the default courses to the args.
 
-    course_ids = request.args["courses"].split(',')
+    course_ids = request.args["courses"].split('and')
     courses = database.get_courses(course_ids)
     for course in courses:
         course["links"] = database.get_links(course["id"])
