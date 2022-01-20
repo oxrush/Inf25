@@ -68,8 +68,8 @@ def course(id):
 
     links = database.get_links(id)
 
-    date_assignments = database.get_date_assignments(id)
-    weekly_assignments = database.get_weekly_assignments(id)
+    date_assignments = database.get_date_assignments([id])
+    weekly_assignments = database.get_weekly_assignments([id])
 
     return render_template("course.html", course_info=course_info, links=links, date_assignments=date_assignments, weekly_assignments=weekly_assignments)
 
