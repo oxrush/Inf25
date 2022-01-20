@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 import json
 from os import getenv
 import re
@@ -39,16 +39,25 @@ def index():
 
     course_ids = request.args["courses"].split('and')
     courses = database.get_courses(course_ids)
+    
+    courses_dict = {}
+
     for course in courses:
         course["links"] = database.get_links(course["id"])
-    return render_template("main.html", courses=courses, quote_plus=quote_plus)
+        courses_dict[course["id"]] = course
+
+
+    weekly_assignments = database.get_weekly_assignments(course_ids)
+    date_assignments = database.get_date_assignments(course_ids)
+
+    return render_template("main.html", courses=courses, courses_dict=courses_dict, quote_plus=quote_plus, weekly_assignments=weekly_assignments, date_assignments=date_assignments)
 '''
 @app.errorhandler(404)
 def err_404(e):
     return render_template("404.html"), 404
 '''
 
-@app.route("/course/<id>", methods=["GET", "POST"])
+@app.route("/course/<id>")
 @verification_required
 def course(id):
     course_infos = database.get_courses([id])
@@ -57,30 +66,41 @@ def course(id):
     else:
         course_info = course_infos[0] # There can only be one.
 
-    if request.method == "POST":
-        type = request.form["type"]
-        precedence = request.form["precedence"]
-        title = request.form["title"]
-        url = request.form["url"]
-        email = session["verified_email"]
+    links = database.get_links(id)
 
-        if not title or not url:
-            return "Title and url are both required.", 400
+    date_assignments = database.get_date_assignments(id)
+    weekly_assignments = database.get_weekly_assignments(id)
 
-        # TODO: Sanitise data.
-        database.add_link(course_info["id"], type, precedence, url, title, email)
+    return render_template("course.html", course_info=course_info, links=links, date_assignments=date_assignments, weekly_assignments=weekly_assignments)
 
-        return redirect(url_for("course", id=id))
+@app.route("/course/<id>/addlink", methods=["POST"])
+@verification_required
+def course_add_link(id):
+    
+    if len(database.get_courses([id])) == 0:
+        abort(404) # The course does not exist
 
-    links = database.get_links(course_info["id"])
-    return render_template("course.html", course_info=course_info, links=links)
+    type = request.form["type"]
+    precedence = request.form["precedence"]
+    title = request.form["title"]
+    url = request.form["url"]
+    email = session["verified_email"]
+
+    if not title or not url:
+        print("Title and url are both required.")
+        return "Title and url are both required.", 400
+
+    # TODO: Sanitise data.
+    database.add_link(id, type, precedence, url, title, email)
+
+    return "", 204 # No Content
+
 
 @app.route("/link/<id>", methods=["POST", "DELETE"])
 @verification_required
 def link(id):
     email = session["verified_email"]
     if request.method == "DELETE":
-        print(id)
         database.delete_link(id, email)
         return "", 204 # No Content
     elif request.method == "POST":
@@ -88,8 +108,44 @@ def link(id):
         title = request.form["title"]
         url = request.form["url"]
 
-
         database.update_link(id, precedence, title, url, email)
+
+        return "", 204 # No Content
+
+@app.route("/course/<id>/addassignment", methods=["POST"])
+@verification_required
+def course_add_assignment(id):
+    
+    if len(database.get_courses([id])) == 0:
+        abort(404) # The course does not exist
+
+    email = session["verified_email"]
+
+    date = request.form["date"]
+    time = request.form["time"]
+    name = request.form["name"]
+
+    datetime_str = f"{date} {time}:00"
+
+    database.add_assignment(id, datetime_str, name, email)
+
+    return "", 204 # No Content
+
+@app.route("/assignment/<id>", methods=["POST", "DELETE"])
+@verification_required
+def assignment(id):
+    email = session["verified_email"]
+    if request.method == "DELETE":
+        database.delete_assignment(id, email)
+        return "", 204 # No Content
+    elif request.method == "POST":
+        date = request.form["date"]
+        time = request.form["time"]
+        name = request.form["name"]
+
+        datetime_str = f"{date} {time}:00"
+
+        database.update_assignment(id, datetime_str, name, email)
 
         return "", 204 # No Content
 
@@ -104,7 +160,8 @@ def verify_email():
             address = f"{username}@inf.ed.ac.uk"
 
             if username == "oxrush":
-                address = f"oxrush@maya.cx"
+                address = "oxrush@maya.cx"
+
 
             database.cancel_login_code(address)
             database.add_login_code(address, code)
@@ -178,10 +235,22 @@ def contribute():
 
 @app.route("/api/assignments")
 def api_assignments():
-    date = request.args["date"]
+    s_from = request.args["from"]
+    s_to = request.args["to"]
     courses = request.args["courses"].split("and")
-    assignments = database.get_assignments(courses, date)
+
+    weekday_from = datetime.strptime(s_from, "%Y-%m-%d %H:%M:%S").strftime("%w")
+    weekday_to = datetime.strptime(s_to, "%Y-%m-%d %H:%M:%S").strftime("%w")
+
+    time_from = s_from.split(" ")[1]
+    time_to = s_to.split(" ")[1]
+
+    date_assignments = database.get_date_assignments(courses, s_from, s_to)
+    weekly_assignments = database.get_weekly_assignments(courses, weekday_from, time_from, weekday_to, time_to)
+
+    assignments = date_assignments + weekly_assignments
     return jsonify(assignments)
+
 
 @app.route("/logout", methods=["POST"])
 def logout():

@@ -53,11 +53,25 @@
 <table><tr>
 
 	<td><h3>Weekly</h3><table class="border">
-		
+		{% for asmt in weekly_assignments %}
+        <tr>
+            <td>{{{"0": "Sunday", "1": "Monday", "2": "Tuesday", "3": "Wednesday", "4": "Thursday", "5": "Friday", "6": "Saturday"}[asmt["datetime"][8]]}}</td>
+            <td>{{asmt["datetime"].split(" ")[1][0:5]}}</td>
+            <td>{{courses_dict[asmt["course_id"]]["shortname"]}}
+            <td>{{asmt["name"]}}</td>
+        </tr>
+        {% endfor %}
 	</table></td>
 	
 	<td><h3>One-off</h3><table class="border">
-		
+		{% for asmt in date_assignments %}
+        <tr>
+            <td>{{asmt["datetime"][0:10]}}</td>
+            <td>{{asmt["datetime"][11:16]}}</td>
+            <td>{{courses_dict[asmt["course_id"]]["shortname"]}}
+            <td>{{asmt["name"]}}</td>
+        </tr>
+        {% endfor %}
 	</table></td>
 	
 </tr></table>

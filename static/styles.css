@@ -36,7 +36,7 @@ ul.sideways li {
 }
 
 #popup {
-    position: absolute;
+    position: fixed;
     display: none;
     width: 500px;
     height: 200px;

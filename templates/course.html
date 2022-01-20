@@ -39,11 +39,44 @@
 <button onclick="add_link('{{link_category}}')">Add new</button>
 {% endfor %}
 
+
+<h3>Assignments</h3>
+<h4>Weekly</h4>
+<table>
+    {% for asmt in weekly_assignments %}
+    <tr>
+        <td>{{{"0": "Sunday", "1": "Monday", "2": "Tuesday", "3": "Wednesday", "4": "Thursday", "5": "Friday", "6": "Saturday"}[asmt["datetime"][8]]}}</td>
+        <td>{{asmt["datetime"].split(" ")[1]}}</td>
+        <td>{{asmt["name"]}}</td>
+        <td>
+            <button onclick="edit_assignment('{{asmt['id']}}', '{{asmt['datetime'].replace(' ', '+')}}', '{{asmt['name']}}')">Edit</button>
+            <button onclick="delete_assignment('{{asmt['id']}}', '{{asmt['name']}}')">Delete</button>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+<button onclick="add_assignment(0)">Add new</button>
+
+<h4>One-off</h4>
+<table>
+    {% for asmt in date_assignments %}
+    <tr>
+        <td>{{asmt["datetime"]}}</td>
+        <td>{{asmt["name"]}}</td>
+        <td>
+            <button onclick="edit_assignment('{{asmt['id']}}', '{{asmt['datetime']}}', '{{asmt['name']}}')">Edit</button>
+            <button onclick="delete_assignment('{{asmt['id']}}', '{{asmt['name']}}')">Delete</button>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+<button onclick="add_assignment(1)">Add new</button>
+
 <iframe name="dummyframe" id="dummyframe" style="display: none;"></iframe>
 
 <div id="popup">
     <h3 id="popup_heading"></h2>
-    <form id="popup_form" method="post" target="dummyframe" onsubmit="delayed_reload()">
+    <form id="popup_form_link" method="post" target="dummyframe" onsubmit="delayed_reload()">
 
         <input id="popup_type" type="hidden" name="type"/>
 
@@ -57,6 +90,34 @@
 
         <label for="url">URL</label>
         <input id="popup_url" type="url" name="url" placeholder="url" required style="width: 85%;" />
+        <br />
+
+        <input type="submit" value="Save" />
+        <input type="button" value="Cancel" onclick="popup_hide()"/>
+
+    </form>
+    <form id="popup_form_assignment" method="post" target="dummyframe" onsubmit="delayed_reload()">
+
+        <label for="date">Day</label>
+        <input id="popup_date" type="date" name="date" required style="width: 85%;" />
+        <select id="popup_weekday" name="date" required style="width: 85%;">
+            <option value="WEEKDAY-1">Monday</option>
+            <option value="WEEKDAY-2">Tuesday</option>
+            <option value="WEEKDAY-3">Wednesday</option>
+            <option value="WEEKDAY-4">Thursday</option>
+            <option value="WEEKDAY-5">Friday</option>
+            <option value="WEEKDAY-6">Saturday</option>
+            <option value="WEEKDAY-0">Sunday</option>
+
+          </select>
+        <br />
+
+        <label for="time">Time</label>
+        <input id="popup_time" type="time" name="time" required style="width: 85%;" />
+        <br />
+
+        <label for="title">Name</label>
+        <input id="popup_name" type="text" name="name" placeholder="name" required autocomplete="off" style="width: 85%;" />
         <br />
 
         <input type="submit" value="Save" />
@@ -92,10 +153,12 @@
 
     function edit_link(id, precedence, title, url){
 
+        document.getElementById("popup_form_link").hidden = false
+        document.getElementById("popup_form_assignment").hidden = true
         document.getElementById("popup_heading").innerHTML = "Edit link";
         document.getElementById("popup_type").value = "";
         document.getElementById("popup_precedence").value = precedence;
-        document.getElementById("popup_form").action = `/link/${id}`;
+        document.getElementById("popup_form_link").action = `/link/${id}`;
         document.getElementById("popup_title").value = title;
         document.getElementById("popup_url").value = url;
         
@@ -104,12 +167,86 @@
 
     function add_link(type){
 
+        document.getElementById("popup_form_link").hidden = false
+        document.getElementById("popup_form_assignment").hidden = true
         document.getElementById("popup_heading").innerHTML = "Add link";
         document.getElementById("popup_type").value = type;
         document.getElementById("popup_precedence").value = 99999;
-        document.getElementById("popup_form").action = "";
+        document.getElementById("popup_form_link").action = "{{url_for('course_add_link', id=course_info['id'])}}";
         document.getElementById("popup_title").value = "";
         document.getElementById("popup_url").value = "";
+        
+        popup_show()
+    }
+
+    function delete_assignment(id, name){
+        confirmed = confirm(`Are you sure you would like to delete the assignment "${name}"?`);
+        if (confirmed) {
+            var req = new XMLHttpRequest();
+            req.addEventListener("error", () => alert("Could not delete."));
+            req.addEventListener("load", () => location.reload());
+            req.open("DELETE", `/assignment/${id}`);
+            req.send();
+        }
+    }
+
+    function edit_assignment(id, datetime, name){
+ 
+        datetime_split = datetime.split(/[\+ ]/) // TODO: Figure out why weekdays are spaces and dates are plus
+        date = datetime_split[0];
+        time = datetime_split[1];
+
+        if (date.split("-")[0] === "WEEKDAY"){ // weekly
+            document.getElementById("popup_date").hidden = true;
+            document.getElementById("popup_date").disabled = true;
+            document.getElementById("popup_weekday").hidden = false;
+            document.getElementById("popup_weekday").disabled = false;
+
+            document.getElementById("popup_weekday").value = date;
+        }
+        else{ // date
+            document.getElementById("popup_date").hidden = false;
+            document.getElementById("popup_date").disabled = false;
+            document.getElementById("popup_weekday").hidden = true;
+            document.getElementById("popup_weekday").disabled = true;
+
+            document.getElementById("popup_date").value = date; 
+        }
+
+        document.getElementById("popup_time").value = time;
+        
+        document.getElementById("popup_form_link").hidden = true; 
+        document.getElementById("popup_form_assignment").hidden = false; 
+        document.getElementById("popup_heading").innerHTML = "Edit assignment";
+        document.getElementById("popup_form_assignment").action = `/assignment/${id}`; 
+        document.getElementById("popup_name").value = name; 
+        popup_show()
+    }
+
+    function add_assignment(type){
+        
+        if (type === 0){ // weekly
+            document.getElementById("popup_date").hidden = true;
+            document.getElementById("popup_date").disabled = true;
+            document.getElementById("popup_weekday").hidden = false;
+            document.getElementById("popup_weekday").disabled = false;
+
+            document.getElementById("popup_weekday").value = "Please select";
+        }
+        else if (type === 1){ // date
+            document.getElementById("popup_date").hidden = false;
+            document.getElementById("popup_date").disabled = false;
+            document.getElementById("popup_weekday").hidden = true;
+            document.getElementById("popup_weekday").disabled = true;
+
+            document.getElementById("popup_date").value = "";
+        }
+
+        document.getElementById("popup_form_link").hidden = true
+        document.getElementById("popup_form_assignment").hidden = false
+        document.getElementById("popup_heading").innerHTML = "Add assignment";
+        document.getElementById("popup_form_assignment").action = "{{url_for('course_add_assignment', id=course_info['id'])}}";
+        document.getElementById("popup_name").value = "";
         
         popup_show()
     }
