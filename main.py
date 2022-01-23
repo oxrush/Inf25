@@ -61,12 +61,13 @@ def err_404(e):
 
 @app.route("/customise")
 def customise():
-    course_ids_checked = (request.args.get("courses") or "").split('and')
+    course_string = request.args.get("courses") or ""
+    course_ids_checked = course_string.split('and')
     courses = database.get_courses()
     for course in courses:
         course["_checked"] = (str(course["id"]) in course_ids_checked)
             
-    return render_template("customise.html", courses=courses, course_ids_checked=course_ids_checked)
+    return render_template("customise.html", courses=courses, course_ids_checked=course_ids_checked, course_string=course_string)
 
 @app.route("/course/<id>")
 @verification_required

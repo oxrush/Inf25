@@ -18,13 +18,13 @@
 </form>
 
 <div>
-    <input type="text" id="url" name="url" style="width: 500px;" value="{{url_for('index', _external=True, courses=course_ids_checked)}}" disabled />
+    <input type="text" id="url" name="url" style="width: 500px;" value="{{url_for('index', _external=True, courses=course_string)}}" disabled />
     <button onclick="go()">Go</button>
     <button onclick="set_cookie()">Save preferences (sets a cookie)</button>
 </div>
 
 <script>
-    var courseString="{{course_ids_checked}}";
+    var courseString="{{course_string}}";
     function update() {
 
         var courses = document.getElementById("courses").getElementsByTagName("input");
