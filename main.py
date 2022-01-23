@@ -35,9 +35,11 @@ def verification_required(function):
 @app.route("/")
 def index():
     if not "courses" in request.args:
-        return redirect(url_for("index", courses="1and2", **request.args)) # add the default courses to the args.
+        courses = request.cookies.get("courses") or "1and2" # TODO: Move default courses to DB / config
+        return redirect(url_for("index", courses=courses, **request.args))
 
-    course_ids = request.args["courses"].split('and')
+    course_string = request.args["courses"]
+    course_ids = course_string.split('and')
     courses = database.get_courses(course_ids)
     
     courses_dict = {}
@@ -50,12 +52,21 @@ def index():
     weekly_assignments = database.get_weekly_assignments(course_ids)
     date_assignments = database.get_date_assignments(course_ids)
 
-    return render_template("main.html", courses=courses, courses_dict=courses_dict, quote_plus=quote_plus, weekly_assignments=weekly_assignments, date_assignments=date_assignments)
+    return render_template("main.html", courses=courses, courses_dict=courses_dict, quote_plus=quote_plus, weekly_assignments=weekly_assignments, date_assignments=date_assignments, course_string=course_string)
 '''
 @app.errorhandler(404)
 def err_404(e):
     return render_template("404.html"), 404
 '''
+
+@app.route("/customise")
+def customise():
+    course_ids_checked = (request.args.get("courses") or "").split('and')
+    courses = database.get_courses()
+    for course in courses:
+        course["_checked"] = (str(course["id"]) in course_ids_checked)
+            
+    return render_template("customise.html", courses=courses, course_ids_checked=course_ids_checked)
 
 @app.route("/course/<id>")
 @verification_required

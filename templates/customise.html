@@ -1,0 +1,56 @@
+{% extends "frame.html" %}
+
+{% block content %}
+
+<h2>Customise</h2>
+
+<h3>Please select the courses you would like to view:</h3>
+
+<form id="courses">
+    {% for course in courses %}
+    <div>
+        <input type="checkbox" id="checkbox-course-{{course['id']}}" name="checkbox-course-{{course['id']}}" value="{{course['id']}}" onchange="update()" {% if course['_checked'] %} checked {% endif %} />
+        <label for="checkbox-course-{{course['id']}}">{{course['shortname']}} &ndash; {{course['name']}}</label>
+    </div>
+
+
+    {% endfor %}
+</form>
+
+<div>
+    <input type="text" id="url" name="url" style="width: 500px;" value="{{url_for('index', _external=True, courses=course_ids_checked)}}" disabled />
+    <button onclick="go()">Go</button>
+    <button onclick="set_cookie()">Save preferences (sets a cookie)</button>
+</div>
+
+<script>
+    var courseString="{{course_ids_checked}}";
+    function update() {
+
+        var courses = document.getElementById("courses").getElementsByTagName("input");
+        var selectedCourses = []
+
+        for (var i = 0; i < courses.length; i++) {
+            element = courses[i]
+            if (!element.type=="checkbox")
+                return;
+            if (element.checked)
+                selectedCourses.push(element.value);
+        }
+        
+        courseString = selectedCourses.join("and")
+        document.getElementById("url").value = "{{url_for('index', _external=True)}}?courses=" + selectedCourses.join("and");
+
+    }
+
+    function go() {
+        location.href = document.getElementById("url").value;
+    }
+
+    function set_cookie() {
+        document.cookie = `courses=${courseString}; expires=Fri, 31 Dec 2100 23:59:59 GMT`;
+        alert("Cookie set.")
+    }
+
+</script>
+{% endblock %}
