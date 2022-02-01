@@ -137,7 +137,10 @@ def course_add_assignment(id):
     time = request.form["time"]
     name = request.form["name"]
 
-    datetime_str = f"{date} {time}:00"
+    if len(time) < 6 :
+            time += ":00"
+
+    datetime_str = f"{date} {time}"
 
     database.add_assignment(id, datetime_str, name, email)
 
@@ -155,7 +158,10 @@ def assignment(id):
         time = request.form["time"]
         name = request.form["name"]
 
-        datetime_str = f"{date} {time}:00"
+        if len(time) < 6 :
+            time += ":00"
+
+        datetime_str = f"{date} {time}"
 
         database.update_assignment(id, datetime_str, name, email)
 
