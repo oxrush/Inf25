@@ -31,6 +31,14 @@
     <img class="right" src="{{url_for('static', filename='AT.png')}}" alt="Our Home - Appleton Tower">
     <h1>Inf'25 Dashboard</h1>
 
+    <h2>{% block heading %}{% endblock %}</h2>
+
+    <ul class="sideways">
+        <li><a href="{{url_for('index')}}">Dashboard</a></li>
+        <li><a href="{{url_for('customise', courses=course_string)}}">Choose courses</a></li>
+        <li><a href="{{url_for('contribute')}}">Edit / Contribute</a></li>
+    </ul>
+
     {% block content %}
     {% endblock %}
 
@@ -42,7 +50,7 @@
         Each user is responsible for the content they submit, but if you see anything inappropriate, please contact me as above for it to be removed and the appropriate action taken.
     <em></p>
     <p><em>
-        Privacy policy: No cookies will be set unless you click the "Save preferences" button on the customise page, or use the "Verify your identity" feature. The following data are collected: Your IP address and basic browser/device information is collected in the server logs, as is standard; Any email address you enter and any login attempts may be recorded; Any data you contribute will be saved in the database, along with your verified email address, even if overwritten or deleted &ndash; if you need this wiped from the record, please contact me as above. If you submit inappropriate content, I reserve the right to disclose your email address to relevant parties.
+        <a href="/privacy">Privacy policy</a>
     </p></em>
         
     </body>

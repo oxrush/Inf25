@@ -5,6 +5,22 @@ import sqlite3
 def __db_connect():
     return sqlite3.connect("db.sqlite3")
 
+def get_config(key):
+    conn = __db_connect()
+    cur = conn.cursor()
+
+    try:
+        query = """
+            SELECT value
+            FROM Config
+            WHERE key = ?
+        """
+        (value,) = cur.execute(query, (key,))
+    finally:
+        conn.close()
+
+    return value
+
 def get_courses(ids=None):
     conn = __db_connect()
     cur = conn.cursor()

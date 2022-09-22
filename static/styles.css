@@ -7,14 +7,15 @@ table.border, table.border th, table.border td {
     border-collapse: collapse;
 }
 
-th.course {width: 33.3333% }
-
 td {
     vertical-align:top;
     padding:10px;
 }
 
-table.fullwidth {width: 100%;}
+table.fullwidth {
+    width: 100%;
+    table-layout: fixed;
+}
 
 ul.sideways li {
     display:inline-block;

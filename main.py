@@ -35,11 +35,11 @@ def verification_required(function):
 @app.route("/")
 def index():
     if not "courses" in request.args:
-        courses = request.cookies.get("courses") or "1and2" # TODO: Move default courses to DB / config
+        courses = request.cookies.get("courses") or database.get_config("default_courses")
         return redirect(url_for("index", courses=courses, **request.args))
 
     course_string = request.args["courses"]
-    course_ids = course_string.split('and')
+    course_ids = course_string.split(' ')
     courses = database.get_courses(course_ids)
     
     courses_dict = {}
@@ -62,7 +62,7 @@ def err_404(e):
 @app.route("/customise")
 def customise():
     course_string = request.args.get("courses") or ""
-    course_ids_checked = course_string.split('and')
+    course_ids_checked = course_string.split(' ')
     courses = database.get_courses()
     for course in courses:
         course["_checked"] = (str(course["id"]) in course_ids_checked)
@@ -274,6 +274,10 @@ def api_assignments():
 def logout():
     session.clear()
     return redirect(url_for("index"))
+
+@app.route("/privacy")
+def privacy_policy():
+    return render_template("privacy_policy.html")
 
 @app.errorhandler(404)
 def err_404(error):
