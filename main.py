@@ -171,14 +171,11 @@ def assignment(id):
 def verify_email():
     if request.method == "POST":
         username = request.form["login"]
-        if re.match(r"^s\d{7}$", username) or username == "oxrush":
+        if re.match(r"^s\d{7}$", username):
             code = secrets.token_hex(8)
             
 
             address = f"{username}@inf.ed.ac.uk"
-
-            if username == "oxrush":
-                address = "oxrush@maya.cx"
 
 
             database.cancel_login_code(address)
