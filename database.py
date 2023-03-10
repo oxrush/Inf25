@@ -17,8 +17,8 @@ def get_config(key):
         """
         result = cur.execute(query, (key,))
 
-        # If key is set, result will be singleton tuple of value, otherwise it will be None.
-        if result:
+        # If key is set, result will be single row with value, otherwise it will be empty so return None.
+        if result.rowcount == 1:
             (value,) = result
         else:
             value = None
