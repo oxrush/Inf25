@@ -35,7 +35,7 @@ def verification_required(function):
 @app.route("/")
 def index():
     if not "courses" in request.args:
-        courses = request.cookies.get("courses") or database.get_config("default_courses")
+        courses = request.cookies.get("courses") or database.get_config("default_courses") or []
         return redirect(url_for("index", courses=courses, **request.args))
 
     course_string = request.args["courses"]
