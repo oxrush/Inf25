@@ -16,14 +16,15 @@ def get_config(key):
             WHERE key = ?
         """
         result = cur.execute(query, (key,))
+
+        # If key is set, result will be singleton tuple of value, otherwise it will be None.
+        if result:
+            (value,) = result
+        else:
+            value = None
+
     finally:
         conn.close()
-
-    # If key is set, result will be singleton tuple of value, otherwise it will be None.
-    if result:
-        (value,) = result
-    else:
-        value = None
 
     return value
 
