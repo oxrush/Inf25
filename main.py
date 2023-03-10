@@ -14,7 +14,7 @@ from urllib.parse import urlparse, quote_plus
 
 app = Flask(__name__)
 
-app.config.from_json("config.json")
+app.config.from_pyfile("config.py")
 
 app.url_map.strict_slashes = False # https://stackoverflow.com/questions/33241050/trailing-slash-triggers-404-in-flask-path-rule
 
