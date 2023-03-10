@@ -15,9 +15,15 @@ def get_config(key):
             FROM Config
             WHERE key = ?
         """
-        (value,) = cur.execute(query, (key,))
+        result = cur.execute(query, (key,))
     finally:
         conn.close()
+
+    # If key is set, result will be singleton tuple of value, otherwise it will be None.
+    if result:
+        (value,) = result
+    else:
+        value = None
 
     return value
 
